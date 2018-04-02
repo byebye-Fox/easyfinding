@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>地图单击事件</title>
+	<title>EasyFinding</title>
 	<link rel="stylesheet" href="lib/bootstrap.min.css">
 	<link rel="stylesheet" href="css/style.css">
 </head>
@@ -79,11 +79,13 @@
 	<script src="js/layerGroup.js"></script>
 	<script>
 		//获取版本号,设置title
-		document.title = '地图单击事件V' + fengmap.VERSION;
+		document.title = 'EasyFinding' ;
 
 		//定义全局map变量
 		var map;
 		var fmapID = '10347';
+		//当前展示地图编号
+		
 		// 控制是否弹出信息框
 		var startPick = true;
 		//判断当前是否点击的是poi,控制点击公共设施的时候只弹出公共设施的信息框
