@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>地图单击事件</title>
+	<link rel="stylesheet" href="lib/bootstrap.min.css">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+	<div id="fengMap"></div>
+	<!-- data-backdrop="false" -->
+	<div id="dlgModelInfo" class="modal fade">
+		<div class="modal-dialog bottom">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">拾取对象类型：</h4>
+				</div>
+				<div class="modal-body">
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-md-offset-1">
+						
+								<div class="row">
+									<div class="col-md-12" id="m-x"></div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" id="m-y"></div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" id="m-groupid"></div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" id="m-qrcode">
+										<form>
+											<label>二维码编号：</label>
+											<input class="form-control" id="i-qrcode" placeholder="二维码编号">
+										</form>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" id="m-website">
+										<form>
+											<label>业务网站：</label>
+											<input class="form-control" id="i-website" placeholder="业务网站">
+										</form>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" id="m-info">
+										<form>
+											<label>详细介绍：</label>
+											<textarea class="form-control" id="i-info" placeholder="详细介绍"></textarea>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-primary">确认</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<script src="lib/jquery-2.1.4.min.js"></script>
+	<script src="lib/fengmap.min.js"></script>
+	<script src="lib/bootstrap.min.js"></script>
+	<script src="js/layerGroup.js"></script>
+	<script>
+		//获取版本号,设置title
+		document.title = '地图单击事件V' + fengmap.VERSION;
+
+		//定义全局map变量
+		var map;
+		var fmapID = '10347';
+		// 控制是否弹出信息框
+		var startPick = true;
+		//判断当前是否点击的是poi,控制点击公共设施的时候只弹出公共设施的信息框
+		var clickedPOI = false;
+		// 点击事件ID
+		var eventID = null;
+
+		window.onload = function() {
+			map = new fengmap.FMMap({
+				//渲染dom
+				container: document.getElementById('fengMap'),
+				//地图数据位置
+				mapServerURL: './data/' + fmapID,
+				//主题数据位置
+				mapThemeURL: './data/theme',
+				//设置主题
+				defaultThemeName: '2001',
+				// 默认比例尺级别设置为20级
+				defaultMapScaleLevel: 20,
+				//不支持单击模型高亮，true为单击时模型高亮
+				modelSelectedEffect: false,
+				//开发者申请应用下web服务的key
+				key: '8477c21128f5894a7b2dfb7ede7ba582',
+				//开发者申请应用名称
+				appName: 'fengmap_test',
+			});
+
+			//打开Fengmap服务器的地图数据和主题
+			map.openMapById(fmapID);
+
+			//点击事件
+			map.on('mapClickNode', function(event) {
+				var model = event;
+				if (!startPick) return;
+				var d;
+				switch (event.nodeType) {
+					case fengmap.FMNodeType.MODEL:
+						if (clickedPOI && event.eventInfo.eventID == eventID) {
+							map.selectNull();
+							clickedPOI = false;
+							return;
+						}
+
+						//过滤类型为墙的model
+						if (event.typeID == '30000') {
+							//其他操作
+							return;
+						}
+
+						d = {
+							name: event.name,
+							x: event.mapCoord.x,
+							y: event.mapCoord.y,
+							groupid: event.groupID,
+						};
+
+						//模型高亮
+						map.storeSelect(model);
+						//弹出信息框
+						gui.showClickInfo(d);
+						break;
+					case fengmap.FMNodeType.FACILITY:
+					case fengmap.FMNodeType.IMAGE_MARKER:
+						clickedPOI = true;
+						eventID = event.eventInfo.eventID;
+						d = {
+							name: event.target.name,
+							x: event.target.x,
+							y: event.target.y,
+							group: event.target.groupID,
+						};
+						//弹出信息框
+						gui.showClickInfo(d);
+						break;
+				}
+			});
+		};
+	</script>
+</body>
+
+</html>
